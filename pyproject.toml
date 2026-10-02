@@ -21,3 +21,6 @@ dev = [
     "pyright>=1.1.414",
     "ruff>=0.16.10",
 ]
+
+[tool.pyright]
+exclude = ["examples"]  # 历史学习目录，错误来自第三方库类型标注不全，不纳入检查

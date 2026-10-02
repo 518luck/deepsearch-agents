@@ -53,9 +53,11 @@ class ToolMonitor:
                 print(f"[Monitor] WebSocket send failed: {e}")
 
         # DeepAgents 脚本调试时，若运行时暴露了 stream_writer，同步写入流式输出
-        if hasattr(builtins, "runtime") and hasattr(builtins.runtime, "stream_writer"):
+        # runtime 由脚本模式动态注入 builtins，静态类型检查器不可知，用 getattr 读取
+        runtime = getattr(builtins, "runtime", None)
+        if runtime is not None and hasattr(runtime, "stream_writer"):
             try:
-                builtins.runtime.stream_writer(payload)
+                runtime.stream_writer(payload)
             except Exception:  # noqa: BLE001, S110  调试通道失败时静默忽略
                 pass
 
