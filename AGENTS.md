@@ -7,57 +7,31 @@
 ## 项目布局
 
 ```shell
-shopkeeper-agent/
-├─ app/
-│  ├─ agent/
-│  │  ├─ graph.py # 负责定义langgraph图
-│  │  ├─ state.py # 负责定义langgraph状态
-│  │  ├─ context.py # 负责定义langgraph运行上下文
-│  │  ├─ llm.py # 负责定义llm
-│  │  └─ nodes/
-│  │     ├─ extract_keywords.py # 负责定义关键词抽取的节点
-│  │     ├─ recall_column.py # 负责定义召回字段信息的节点
-│  │     ├─ recall_metric.py # 负责定义召回指标信息的节点
-│  │     ├─ recall_value.py  # 负责定义召回字段取值的节点
-│  │     ├─ merge_retrieved_info.py # 负责定义合并召回信息的节点
-│  │     ├─ filter_metric.py # 负责定义过滤指标信息的节点
-│  │     ├─ filter_table.py # 负责定义过滤表格信息的节点
-│  │     ├─ add_extra_context.py # 负责定义添加额外上下文信息的节点
-│  │     ├─ generate_sql.py # 负责定义生成SQL的节点
-│  │     ├─ validate_sql.py # 负责定义校验SQL的节点
-│  │     ├─ correct_sql.py # 负责定义校正SQL的节点
-│  │     └─ execute_sql.py # 负责定义执行SQL的节点
-│  │
-│  └─ repositories/
-│     ├─ mysql/
-│     │  ├─ meta/
-│     │  │  ├─ meta_mysql_repository.py
-│     │  │  └─ mappers/
-│     │  │     ├─ table_info_mapper.py
-│     │  │     ├─ column_info_mapper.py
-│     │  │     ├─ metric_info_mapper.py
-│     │  │     └─ column_metric_mapper.py
-│     │  └─ dw/
-│     │     └─ dw_mysql_repository.py
-│     │
-│     ├─ qdrant/
-│     │  ├─ column_qdrant_repository.py
-│     │  └─ metric_qdrant_repository.py
-│     │
-│     └─ es/
-│        └─ value_qdrant_repository.py
-│
-├─ prompts/
-│  ├─ extend_keywords_for_column_recall.prompt # 为召回字段信息扩展关键词 的提示词
-│  ├─ extend_keywords_for_metric_recall.prompt # 为召回指标信息扩展关键词 的提示词
-│  ├─ extend_keywords_for_value_recall.prompt # 为召回字段取值扩展关键词 的提示词
-│  ├─ filter_metric_info.prompt # 过滤指标信息 的提示词
-│  ├─ filter_table_info.prompt # 过滤表格信息 的提示词
-│  ├─ generate_sql.prompt # 生成SQL 的提示词
-│  └─ correct_sql.prompt # 校正SQL 的提示词
-│
-└─ prompt/
-   └─ prompt_loader.py
+deepsearch-agents/
+├── app/                    # 后端业务代码主目录
+│   ├── agent/              # 模型初始化、提示词加载、主智能体和子智能体组装逻辑
+│   │   ├── llm.py          # 统一创建大模型对象
+│   │   ├── prompts.py      # 读取 app/prompt/prompts.yml
+│   │   ├── main_agent.py   # 后续章节补充：主智能体组装入口
+│   │   └── sub_agents/     # 后续章节补充：网络、数据库、RAGFlow 子智能体
+│   ├── api/                # FastAPI、WebSocket、上下文隔离和执行过程监控相关代码
+│   │   ├── context.py      # 保存 thread_id 和 session_dir 上下文
+│   │   ├── monitor.py      # 推送工具调用、助手调用和任务结果
+│   │   └── server.py       # 后续章节补充：FastAPI 服务入口
+│   ├── prompt/             # YAML 提示词配置，让提示词和 Python 逻辑分开维护
+│   │   └── prompts.yml     # 主智能体和子智能体提示词配置
+│   ├── tools/              # 后续章节补充：Agent 可调用工具，例如搜索、查库、生成文件
+│   └── utils/              # 普通 Python 工具函数，给后端代码或 Agent Tool 内部调用
+│       ├── path_utils.py   # 统一解析上传文件、输出文件和会话目录路径
+│       └── word_converter.py # Markdown 转 PDF 的底层转换工具
+├── examples/               # 前面章节学习 DeepAgents API 时用到的示例代码
+├── output/                 # 运行时生成：存放 Markdown、PDF 等任务产物
+├── updated/                # 运行时生成：存放用户上传文件
+├── .env.example            # 环境变量示例
+├── .env                    # 本地真实配置，不提交仓库
+├── .python-version         # Python 版本提示
+├── pyproject.toml          # 项目依赖声明
+└── uv.lock                 # 依赖锁定文件
 ```
 
 ## 目录分工（很重要，AI 助手必须遵守）
