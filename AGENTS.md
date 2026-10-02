@@ -50,54 +50,53 @@ deepsearch-agents/
 - 本地原文优先：/Users/duoyun/work/study/study-agent/ai-agents-from-zero/
 - 本项目章节：实战项目-电商问数/；命名 章节号-标题.md；大纲 \_sidebar.md
 
-## 注释规范
-
-### 必须写
-
-- 函数、方法、类、接口、结构体、组件：定义上方一行，简短概述功能。
-- 形参、关键实参、构造字段：参数后写简短概述。
-
-### 标记
-
-使用的 Better Comments 插件
-
-- `>` 和 `!`。
-- `>`：非常重要、易误改、需高亮。
-- `!`：禁止、危险、不可违反约束。
-
-### 禁止
-
-- 多行注释块。
-- 解释实现过程。
-- 复述函数名。
-- 滥用 `>` 或 `!`。
-
-### better-comments 提醒
-
-Python 的 `#` 同时是注释符。若配置中存在 `"tag": "#"`，所有 Python 注释会被当成文件级高亮。使用本规范时，从配置中移除 `#` 标签。
-
 ### 示例
+
+- 函数 / 方法 / 类 → 用 **docstring**（`"""..."""`），单行即可。
+- 变量 / 常量 → 紧贴上方写 `#` 注释，Pylance 悬停会显示。
+- 形参 / 字段 → 行内 `#` 注释，悬停不显示，只用于阅读。
 
 ```python
 # 计算订单总价（含税）
-def calc_total(items: list[Item], rate: float) -> float: ...
+def calc_total(items: list[Item], rate: float) -> float:
+    """计算订单总价（含税）。"""  # ← 悬停看这条
+    ...
 
 # > 全局单例，禁止在业务代码中重新实例化
-settings = Settings()
+settings = Settings()  # ← 悬停看上面那行注释
+
+class Order:
+    """订单实体。"""  # ← 悬停看这条
+
+    def pay(self, amount: float) -> bool:
+        """发起支付，返回是否成功。"""
+        ...
 
 # ! 必须在事件循环启动前调用
-def load_config(path: str) -> None: ...
+def load_config(path: str) -> None:
+    """加载配置文件。"""
+    ...
+```
 
+函数多参数时：
+
+```python
 def calc_total(
     items: list[Item],  # 商品列表
     rate: float,        # 税率，0~1
-) -> float: ...
+) -> float:
+    """计算订单总价（含税）。"""
+    ...
 
 cfg = {
     "addr": "0.0.0.0:8080",  # 监听地址
     "timeout": 5,            # 超时秒数
 }
 ```
+
+### better-comments 提醒
+
+Python 的 `#` 同时是注释符。若配置中存在 `"tag": "#"`，所有 Python 注释会被当成文件级高亮。使用本规范时，从配置中移除 `#` 标签。
 
 ## 工程纪律
 
