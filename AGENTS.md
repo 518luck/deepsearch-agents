@@ -3,32 +3,75 @@
 ## 目录定位
 
 - 本目录是跟随教程《ai-agents-from-zero》实战项目「深度研搜」第 9~14 章**自己动手写代码**的初始项目。
-- 当前状态 = 官方仓库教程第 8 章「项目总览与工程初始化」时点（commit `d6ddfb5`）：只有根配置文件（pyproject.toml / requirements.txt / uv.lock / .env.example 等）+ `examples/`（17 个官方学习示例）。
-- **没有 `app/` 目录**——教程 5.2 的目录图是规划图，`app/` 下的代码（llm.py、prompts.py、context.py、monitor.py、子智能体、主智能体、server 等）需要按教程第 9 章开始逐章自己创建。
 
 ## 目录分工（很重要，AI 助手必须遵守）
 
-| 目录 | 用途 |
-|---|---|
-| `/Users/duoyun/work/test/deepsearch-agents`（本目录） | 练习田：跟着教程自己写 |
-| `/Users/duoyun/work/test/deepsearch-agents-examples` | 官方**完整成品**仓库：只作对照参考，**严禁把里面的代码直接复制过来交差** |
-| `/Users/duoyun/work/study/study-agent/deepsearch-agents` | 更早的 examples 学习目录（手写示例 1~14 号，对应教程第 1~7 章） |
+| 目录                                                     | 用途                                                                     |
+| -------------------------------------------------------- | ------------------------------------------------------------------------ |
+| `/Users/duoyun/work/test/deepsearch-agents`（本目录）    | 练习田：跟着教程自己写                                                   |
+| `/Users/duoyun/work/test/deepsearch-agents-examples`     | 官方**完整成品**仓库：只作对照参考，**严禁把里面的代码直接复制过来交差** |
+| `/Users/duoyun/work/study/study-agent/deepsearch-agents` | 更早的 examples 学习目录（手写示例 1~14 号，对应教程第 1~7 章）          |
 
 - 推荐节奏：学教程某章 → 在本目录 `app/` 下自己实现 → 写完运行验证 → 再与 `deepsearch-agents-examples` 里对应文件对照，检查理解偏差并修正。
 - 教程提到「项目对应文件路径 `examples/xx-...`」时，两个目录的 examples 编号一致，可直接对照。
 
-## 环境备忘
+## 注释规范
 
-- Python 3.12，uv 管理依赖（.venv 已按第 8 章时点的 pyproject.toml 同步）。
-- 后续章节需要新依赖（如 fastapi、ragflow-sdk、mysql-connector-python 等）时，按教程用 `uv add xxx` 或 `uv add -r requirements.txt` 安装，**不要用 pip install**。
-- `.env` 尚未创建：按教程第 9 章 `cp .env.example .env` 后填真实值。变量名为 `OPENAI_BASE_URL` / `LLM_QWEN_MAX` / `TAVILY_API_KEY` / `RAGFLOW_API_URL` / `RAGFLOW_API_KEY` / `MYSQL_*` 这套，**与 study 学习目录的变量名（LLM_MODEL 等）不同，不要直接拷贝**。
+### 必须写
 
-## 代码交付规范
+- 函数、方法、类、接口、结构体、组件：定义上方一行，简短概述功能。
+- 形参、关键实参、构造字段：参数后写简短概述。
 
-- 写完或修改任何代码后必须运行验证（在本目录用 `uv run ...`），报错修复后再交付，不夸大"已验证"。
-- 文件路径与命名严格跟教程（如 `app/agent/llm.py`、`app/prompt/prompts.yml`），保持与教程、参考答案三方可比对。
-- 每完成一章，在下方「练习进度」追加一行记录。
+### 标记
 
-## 练习进度
+使用的 Better Comments 插件
 
-- 未开始。下一章：教程第 9 章「基础模块与模型配置」（.env、context.py、monitor.py、path_utils.py、word_converter.py、llm.py、prompts.yml）。
+- `>` 和 `!`。
+- `>`：非常重要、易误改、需高亮。
+- `!`：禁止、危险、不可违反约束。
+
+### 禁止
+
+- 多行注释块。
+- 解释实现过程。
+- 复述函数名。
+- 滥用 `>` 或 `!`。
+
+### better-comments 提醒
+
+Python 的 `#` 同时是注释符。若配置中存在 `"tag": "#"`，所有 Python 注释会被当成文件级高亮。使用本规范时，从配置中移除 `#` 标签。
+
+### 示例
+
+```python
+# 计算订单总价（含税）
+def calc_total(items: list[Item], rate: float) -> float: ...
+
+# > 全局单例，禁止在业务代码中重新实例化
+settings = Settings()
+
+# ! 必须在事件循环启动前调用
+def load_config(path: str) -> None: ...
+
+def calc_total(
+    items: list[Item],  # 商品列表
+    rate: float,        # 税率，0~1
+) -> float: ...
+
+cfg = {
+    "addr": "0.0.0.0:8080",  # 监听地址
+    "timeout": 5,            # 超时秒数
+}
+```
+
+## 工程纪律
+
+- 不确定时：多读代码；仍然无法解决时，提供简短的选项后提问。绝不猜测。
+- 修复根因（而非表面修补）。
+- 聚焦变更；避免无关重构。
+- 行为或用法变更时，同步更新文档和测试。
+- 绝不通过删除、跳过或注释掉测试来使其通过；修复底层代码。
+- AGENTS.md 的编写规则
+  1. **简单明了**：只写 Agent 猜不到的信息，不写通用编程常识。
+  2. **空白优于猜测**：不确定的内容宁可留空，也不要用模糊表述填充。
+  3. **具体优于宽泛**：用确切的命令、路径、规则，替代需要 Agent 猜测的描述。
