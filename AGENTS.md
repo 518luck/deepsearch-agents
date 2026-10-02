@@ -45,6 +45,11 @@ deepsearch-agents/
 - 推荐节奏：学教程某章 → 在本目录 `app/` 下自己实现 → 写完运行验证 → 再与 `deepsearch-agents-examples` 里对应文件对照，检查理解偏差并修正。
 - 教程提到「项目对应文件路径 `examples/xx-...`」时，两个目录的 examples 编号一致，可直接对照。
 
+## 教学文档
+
+- 本地原文优先：/Users/duoyun/work/study/study-agent/ai-agents-from-zero/
+- 本项目章节：实战项目-电商问数/；命名 章节号-标题.md；大纲 \_sidebar.md
+
 ## 注释规范
 
 ### 必须写
