@@ -4,6 +4,62 @@
 
 - 本目录是跟随教程《ai-agents-from-zero》实战项目「深度研搜」第 9~14 章**自己动手写代码**的初始项目。
 
+## 项目布局
+
+```shell
+shopkeeper-agent/
+├─ app/
+│  ├─ agent/
+│  │  ├─ graph.py # 负责定义langgraph图
+│  │  ├─ state.py # 负责定义langgraph状态
+│  │  ├─ context.py # 负责定义langgraph运行上下文
+│  │  ├─ llm.py # 负责定义llm
+│  │  └─ nodes/
+│  │     ├─ extract_keywords.py # 负责定义关键词抽取的节点
+│  │     ├─ recall_column.py # 负责定义召回字段信息的节点
+│  │     ├─ recall_metric.py # 负责定义召回指标信息的节点
+│  │     ├─ recall_value.py  # 负责定义召回字段取值的节点
+│  │     ├─ merge_retrieved_info.py # 负责定义合并召回信息的节点
+│  │     ├─ filter_metric.py # 负责定义过滤指标信息的节点
+│  │     ├─ filter_table.py # 负责定义过滤表格信息的节点
+│  │     ├─ add_extra_context.py # 负责定义添加额外上下文信息的节点
+│  │     ├─ generate_sql.py # 负责定义生成SQL的节点
+│  │     ├─ validate_sql.py # 负责定义校验SQL的节点
+│  │     ├─ correct_sql.py # 负责定义校正SQL的节点
+│  │     └─ execute_sql.py # 负责定义执行SQL的节点
+│  │
+│  └─ repositories/
+│     ├─ mysql/
+│     │  ├─ meta/
+│     │  │  ├─ meta_mysql_repository.py
+│     │  │  └─ mappers/
+│     │  │     ├─ table_info_mapper.py
+│     │  │     ├─ column_info_mapper.py
+│     │  │     ├─ metric_info_mapper.py
+│     │  │     └─ column_metric_mapper.py
+│     │  └─ dw/
+│     │     └─ dw_mysql_repository.py
+│     │
+│     ├─ qdrant/
+│     │  ├─ column_qdrant_repository.py
+│     │  └─ metric_qdrant_repository.py
+│     │
+│     └─ es/
+│        └─ value_qdrant_repository.py
+│
+├─ prompts/
+│  ├─ extend_keywords_for_column_recall.prompt # 为召回字段信息扩展关键词 的提示词
+│  ├─ extend_keywords_for_metric_recall.prompt # 为召回指标信息扩展关键词 的提示词
+│  ├─ extend_keywords_for_value_recall.prompt # 为召回字段取值扩展关键词 的提示词
+│  ├─ filter_metric_info.prompt # 过滤指标信息 的提示词
+│  ├─ filter_table_info.prompt # 过滤表格信息 的提示词
+│  ├─ generate_sql.prompt # 生成SQL 的提示词
+│  └─ correct_sql.prompt # 校正SQL 的提示词
+│
+└─ prompt/
+   └─ prompt_loader.py
+```
+
 ## 目录分工（很重要，AI 助手必须遵守）
 
 | 目录                                                     | 用途                                                                     |
