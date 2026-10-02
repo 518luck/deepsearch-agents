@@ -62,8 +62,10 @@ def calc_total(items: list[Item], rate: float) -> float:
     """计算订单总价（含税）。"""  # ← 悬停看这条
     ...
 
+
 # > 全局单例，禁止在业务代码中重新实例化
 settings = Settings()  # ← 悬停看上面那行注释
+
 
 class Order:
     """订单实体。"""  # ← 悬停看这条
@@ -71,6 +73,7 @@ class Order:
     def pay(self, amount: float) -> bool:
         """发起支付，返回是否成功。"""
         ...
+
 
 # ! 必须在事件循环启动前调用
 def load_config(path: str) -> None:
@@ -83,14 +86,15 @@ def load_config(path: str) -> None:
 ```python
 def calc_total(
     items: list[Item],  # 商品列表
-    rate: float,        # 税率，0~1
+    rate: float,  # 税率，0~1
 ) -> float:
     """计算订单总价（含税）。"""
     ...
 
+
 cfg = {
     "addr": "0.0.0.0:8080",  # 监听地址
-    "timeout": 5,            # 超时秒数
+    "timeout": 5,  # 超时秒数
 }
 ```
 
