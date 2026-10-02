@@ -15,6 +15,7 @@
 # Python
 .venv/
 .uv-cache/
+.ruff_cache/
 venv/
 env/
 .env
