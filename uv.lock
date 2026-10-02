@@ -194,6 +194,7 @@ dependencies = [
     { name = "langchain-openai" },
     { name = "langgraph" },
     { name = "python-dotenv" },
+    { name = "pyyaml" },
     { name = "reportlab" },
     { name = "tavily-python" },
 ]
@@ -212,6 +213,7 @@ requires-dist = [
     { name = "langchain-openai", specifier = "==1.2.1" },
     { name = "langgraph", specifier = "==1.1.10" },
     { name = "python-dotenv", specifier = "==1.2.2" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "reportlab", specifier = "==5.0.1" },
     { name = "tavily-python", specifier = "==0.7.24" },
 ]
