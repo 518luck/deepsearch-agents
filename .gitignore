@@ -24,6 +24,11 @@ __pycache__/
 *$py.class
 *.pyc
 
+# 运行时任务目录：output 存各会话产物，updated 暂存用户上传文件
+# 两者都建在 app/ 下，run_deep_agent 与 server.py 用的是同一个基准
+app/output
+app/updated
+
 # profiling files
 chrome-profiler-events*.json
 speed-measure-plugin*.json
