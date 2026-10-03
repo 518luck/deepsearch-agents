@@ -5,16 +5,18 @@ FastAPI 服务入口模块
 上传、列文件、下载），WebSocket 负责把执行过程的进度推回前端。
 
 本模块先做基础准备（生命周期、应用对象、运行目录、跨域），
-再提供任务接口：启动任务、替换同会话旧任务、取消任务。
+再提供任务接口（启动、替换、取消）和文件接口（上传、列表、下载）。
 """
 
 import asyncio
+import shutil
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from app.agent.main_agent import run_deep_agent
@@ -132,3 +134,114 @@ async def cancel_task(thread_id: str):
 
     _forget_task(thread_id, task)
     return {"status": "cancelled", "thread_id": thread_id}
+
+
+@app.post("/api/upload")
+async def upload_files(
+    files: list[UploadFile] = File(...),  # noqa: B008  FastAPI 约定：File/Form 就是当默认值用的
+    thread_id: str = Form(...),
+):
+    """
+    文件上传接口 (File Upload)。
+
+    目标：
+    1. 接收用户上传的一个或多个文件。
+    2. 保存到 `updated/session_{thread_id}` 目录。
+    3. 供 Agent 在后续任务中读取和分析。
+    """
+    # 上传文件先按会话隔离保存，避免不同任务读取到彼此的附件
+    target_dir = updated_dir / f"session_{thread_id}"
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    saved_files = []
+    for file in files:
+        # Starlette 的 filename 类型上允许为空，这种没法落盘的文件直接跳过
+        if not file.filename:
+            continue
+        file_path = target_dir / file.filename
+        # 直接复制文件流，避免大文件一次性读入内存
+        with file_path.open("wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+        saved_files.append(file.filename)
+
+    return {"status": "uploaded", "files": saved_files}
+
+
+@app.get("/api/files")
+async def list_files(path: str):
+    """
+    文件列表查询接口 (File Explorer)。
+
+    目标：
+    1. 列出指定目录下的所有生成文件。
+    2. 提供文件元数据（大小、修改时间、下载所需路径）。
+    3. 严格的安全检查，防止路径遍历攻击。
+    """
+    print(f"[DEBUG] 请求文件列表: {path}")
+
+    try:
+        # 和下载接口保持同一条安全边界：前端只能查看 output 目录内部内容
+        abs_path = Path(path).resolve()
+        output_abs = output_dir.resolve()
+
+        if not abs_path.is_relative_to(output_abs):
+            print(f"[ERROR] 拒绝访问: {abs_path} 不在 {output_abs} 目录下")
+            return {"error": "拒绝访问: 只能访问输出目录下的文件"}
+
+    except Exception as e:  # noqa: BLE001  路径异常也要返回给前端，不能变成 500
+        print(f"[ERROR] 路径解析失败: {e}")
+        return {"error": f"路径无效: {e}"}
+
+    if not abs_path.exists():
+        return {"error": "目录不存在"}
+
+    files = []
+    try:
+        # 递归返回文件元数据，前端据此渲染文件列表并发起下载请求
+        for file_path in abs_path.rglob("*"):
+            if file_path.is_file():
+                stat = file_path.stat()
+                files.append(
+                    {
+                        "name": file_path.name,
+                        "type": "file",
+                        "path": str(file_path),
+                        "size": stat.st_size,
+                        "mtime": stat.st_mtime,
+                    }
+                )
+
+    except Exception as e:  # noqa: BLE001  遍历失败也要返回给前端，不能变成 500
+        print(f"[ERROR] 遍历文件失败: {e}")
+        return {"error": str(e)}
+
+    # 最新生成的文件排在前面，方便用户优先看到本次任务产物
+    files.sort(key=lambda x: x.get("mtime", 0), reverse=True)
+    print(f"[DEBUG] 找到 {len(files)} 个文件")
+    return {"files": files}
+
+
+@app.get("/api/download")
+async def download_file(path: str):
+    """
+    文件下载接口 (File Download)。
+
+    目标：
+    1. 根据绝对路径下载文件。
+    2. 严格的安全检查，防止越权访问。
+    """
+    try:
+        # resolve 后再做 is_relative_to，防止 `../` 之类的路径穿越到 output 之外
+        abs_path = Path(path).resolve()
+        output_abs = output_dir.resolve()
+
+        if not abs_path.is_relative_to(output_abs):
+            return {"error": "拒绝访问: 只能下载输出目录下的文件"}
+    except Exception:  # noqa: BLE001  参数非法时返回中文提示，不能变成 500
+        return {"error": "无效的路径参数"}
+
+    if not abs_path.exists():
+        return {"error": "文件不存在"}
+
+    # FileResponse 会以流式响应返回文件内容，并让浏览器使用原文件名下载
+    return FileResponse(abs_path, filename=abs_path.name)
