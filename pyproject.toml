@@ -19,6 +19,7 @@ dependencies = [
     "ragflow-sdk==0.25.4",
     "reportlab==5.0.1",
     "tavily-python==0.7.24",
+    "uvicorn>=0.54.0",
 ]
 
 [tool.uv]
