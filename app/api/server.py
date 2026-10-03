@@ -14,7 +14,15 @@ import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import (
+    FastAPI,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -245,3 +253,35 @@ async def download_file(path: str):
 
     # FileResponse 会以流式响应返回文件内容，并让浏览器使用原文件名下载
     return FileResponse(abs_path, filename=abs_path.name)
+
+
+@app.websocket("/ws/{thread_id}")
+async def websocket_endpoint(websocket: WebSocket, thread_id: str):
+    """
+    WebSocket 实时通讯核心接口 (Real-time Communication)。
+
+    连接建立后，ConnectionManager 会用 thread_id 保存 WebSocket。monitor 后续
+    发送事件时只需要按 thread_id 查找连接，就能把进度推给对应页面。循环中的
+    receive_text 用于接收前端心跳，避免连接空闲断开。
+    """
+    print(f"会话向我们发起了请求，要求建立连接：{thread_id} 对应：{websocket}")
+
+    # 连接建立后立即按 thread_id 注册，monitor 后续才能把事件定向推给当前页面
+    await manager.connect(websocket, thread_id)
+
+    try:
+        while True:
+            # 前端通常发送 ping 心跳；服务端回复 pong，顺便维持连接活跃
+            data = await websocket.receive_text()
+            await websocket.send_json(
+                {"type": "pong", "message": f"服务端已收到: {data}"}
+            )
+
+    except WebSocketDisconnect:
+        # 只移除当前 WebSocket 实例，避免旧连接断开时误删同 thread_id 的新连接
+        manager.disconnect(websocket, thread_id)
+        print(f"[WebSocket] 客户端已断开: {thread_id}")
+
+    except Exception as e:  # noqa: BLE001  连接异常也要清理登记，不能让连接表残留
+        print(f"[WebSocket] 连接异常: {e}")
+        manager.disconnect(websocket, thread_id)

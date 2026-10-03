@@ -140,6 +140,7 @@ class ConnectionManager:
         """接受 WebSocket 连接并按 thread_id 保存。"""
         await websocket.accept()
         self.active_connections[thread_id] = websocket
+        print(f"Client connected: {thread_id}")
 
     def disconnect(self, websocket: WebSocket, thread_id: str) -> None:
         """移除已断开的连接；新旧连接交替时保留当前生效的连接。"""
