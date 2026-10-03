@@ -9,6 +9,7 @@ run_deep_agent 负责一次任务的完整生命周期：准备会话目录、�
 写入 ContextVar、流式执行主智能体，并把关键事件上报给前端。
 """
 
+import asyncio
 import shutil
 from pathlib import Path
 
@@ -148,6 +149,10 @@ async def run_deep_agent(task_query: str, session_id: str) -> None:
                             )
                             monitor.report_task_result(last_msg.content)
 
+    except asyncio.CancelledError:
+        # 取消信号进来时先上报，再把异常继续抛出，任务才会真正进入取消状态
+        monitor.report_task_cancelled()
+        raise
     except Exception as e:  # noqa: BLE001  异常只做前端上报，不中断服务进程
         # 异步执行异常也走 monitor，保证前端能收到明确错误事件，而不是任务静默中断
         monitor._emit("error", f"执行主智能体发生异常信息：{e!s}")
@@ -159,8 +164,6 @@ async def run_deep_agent(task_query: str, session_id: str) -> None:
 if __name__ == "__main__":
     # 本地脚本验证入口；接 FastAPI 时不要用 asyncio.run，而是用 asyncio.create_task
     # 把任务丢进 FastAPI 已有的事件循环，否则会阻塞或报循环冲突
-    import asyncio
-
     asyncio.run(
         run_deep_agent("从网络查询机器人信息，并生成Markdown文件", "test_session_001")
     )
