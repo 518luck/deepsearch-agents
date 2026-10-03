@@ -12,6 +12,7 @@ dependencies = [
     "mysql-connector-python>=8.0.0",
     "python-dotenv==1.2.2",
     "pyyaml>=6.0.3",
+    "ragflow-sdk==0.25.4",
     "reportlab==5.0.1",
     "tavily-python==0.7.24",
 ]
